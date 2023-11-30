@@ -1,0 +1,172 @@
+from itertools import permutations
+
+def is_valid_solution(mapping, equation):
+
+    s, e, n, d, m, o, r, y = map(mapping.get, 'SENDMONEY')
+    if s == 0 or m == 0:  
+        return False
+    return s * 1000 + e * 100 + n * 10 + d + m * 1000 + o * 100 + r * 10 + e == m * 10000 + o * 1000 + n * 100 + e * 10 + y
+
+def solve_cryptarithmetic(equation):
+    unique_chars = set(char for char in equation if char.isalpha())
+    if len(unique_chars) > 10:
+        print("Invalid equation. Too many unique characters.")
+        return
+
+    for perm in permutations(range(10), len(unique_chars)):
+        mapping = dict(zip(unique_chars, perm))
+        if is_valid_solution(mapping, equation):
+            print("Solution found:")
+            print(mapping)
+            return
+
+    print("No solution found.")
+
+equation = "SEND + MORE = MONEY"
+solve_cryptarithmetic(equation)
+ 29 changes: 29 additions & 0 deletions29  
+Vacuum Cleaner problem.py
+@@ -0,0 +1,29 @@
+class VacuumCleaner:
+    def __init__(self, location="A"):
+        self.location = location  # Initial location of the vacuum cleaner
+        self.cleaned_locations = set()  # Set to track cleaned locations
+
+    def clean(self):
+        print(f"Cleaning location {self.location}")
+        self.cleaned_locations.add(self.location)
+
+    def move(self, new_location):
+        print(f"Moving from {self.location} to {new_location}")
+        self.location = new_location
+
+def vacuum_cleaner_simulation():
+    vacuum = VacuumCleaner()
+
+    while len(vacuum.cleaned_locations) < 2:
+        vacuum.clean()
+
+        # Move to the other location
+        if vacuum.location == "A":
+            vacuum.move("B")
+        else:
+            vacuum.move("A")
+
+    print("Cleaning complete. All locations have been cleaned.")
+
+# Example usage:
+vacuum_cleaner_simulation()
+ 32 changes: 32 additions & 0 deletions32  
+Water Jug Problem.py
+@@ -0,0 +1,32 @@
+from collections import defaultdict
+
+jug1, jug2, aim = 4, 3, 2
+
+visited = defaultdict(lambda: False)
+
+def waterJugSolver(amt1, amt2): 
+
+	if (amt1 == aim and amt2 == 0) or (amt2 == aim and amt1 == 0):
+		print(amt1, amt2)
+		return True
+
+	if visited[(amt1, amt2)] == False:
+		print(amt1, amt2)
+
+		visited[(amt1, amt2)] = True
+
+		return (waterJugSolver(0, amt2) or
+				waterJugSolver(amt1, 0) or
+				waterJugSolver(jug1, amt2) or
+				waterJugSolver(amt1, jug2) or
+				waterJugSolver(amt1 + min(amt2, (jug1-amt1)),
+				amt2 - min(amt2, (jug1-amt1))) or
+				waterJugSolver(amt1 - min(amt1, (jug2-amt2)),
+				amt2 + min(amt1, (jug2-amt2))))
+
+	else:
+		return False
+
+print("Steps: ")
+
+waterJugSolver(0, 0)
+ 76 changes: 76 additions & 0 deletions76  
+missionaries_and_cannibals.py
+@@ -0,0 +1,76 @@
+from collections import deque
+
+def is_valid_state(state):
+
+    for side in state:
+        if side[0] < side[1] and side[0] > 0:
+            return False
+    return True
+
+def is_goal_state(state, total_missionaries):
+
+    return state[1][0] == total_missionaries
+
+def generate_successor_states(current_state, total_missionaries, total_cannibals):
+    successors = []
+
+    for boat_m, boat_c in [(1, 0), (2, 0), (0, 1), (0, 2), (1, 1)]:
+        new_state = (
+            (current_state[0][0] - boat_m, current_state[0][1] - boat_c),
+            (current_state[1][0] + boat_m, current_state[1][1] + boat_c)
+        )
+
+        if 0 <= new_state[0][0] <= total_missionaries and 0 <= new_state[0][1] <= total_cannibals and \
+           0 <= new_state[1][0] <= total_missionaries and 0 <= new_state[1][1] <= total_cannibals and \
+           is_valid_state(new_state):
+            successors.append(new_state)
+
+    return successors
+
+def solve_missionaries_cannibals(total_missionaries, total_cannibals):
+    initial_state = ((total_missionaries, total_cannibals), (0, 0))
+    goal_state = ((0, 0), (total_missionaries, total_cannibals))
+
+    queue = deque([initial_state])
+    visited_states = set()
+
+    while queue:
+        current_state = queue.popleft()
+
+        if current_state in visited_states:
+            continue
+
+        visited_states.add(current_state)
+
+        if is_goal_state(current_state, total_missionaries):
+            print("Solution found:")
+            print_path(current_state, initial_state)
+            return
+
+        successor_states = generate_successor_states(current_state, total_missionaries, total_cannibals)
+
+        for successor in successor_states:
+            if successor not in visited_states:
+                queue.append(successor)
+                predecessors[successor] = current_state
+
+    print("No solution found.")
+
+def print_path(state, initial_state):
+    path = []
+    while state != initial_state:
+        path.append(state)
+        state = predecessors[state]
+
+    path.append(initial_state)
+    path.reverse()
+
+    for s in path:
+        print(f"Left: {s[0]}, Right: {s[1]}")
+
+total_missionaries = 3
+total_cannibals = 3
+
+predecessors = dict()
+
+solve_missionaries_cannibals(total_missionaries, total_cannibals)
